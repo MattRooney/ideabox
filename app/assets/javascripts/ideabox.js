@@ -21,8 +21,8 @@ function fetchIdeas() {
           + "</p><p>Quality: "
           + idea.quality
           + "</p>"
-          + "<button id='delete-post' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-          + "<button id='edit-post' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
+          + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
+          + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
           + "</div>"
         )
       })
@@ -35,17 +35,12 @@ function fetchIdeas() {
 
 function createIdea() {
   $("#create-idea").on("click", function() {
-    var ideaParams = {
-      idea: {
-        title: $('#idea-title').val(),
-        description: $('#idea-description').val()
-      }
-    }
+    var title = $('#idea-title').val()
+    var body = $('#idea-description').val()
 
     $.ajax({
       type: "POST",
-      url: "/api/v1/ideas",
-      data: ideaParams,
+      url: "/api/v1/ideas?title="+title+"&body="+body,
       success: function(newIdea){
         $('#ideas-index').append(
           "<div class='idea' data-id='"
