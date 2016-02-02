@@ -1,6 +1,7 @@
 $(document).ready(function() {
   fetchIdeas()
   createIdea()
+  deleteIdea()
 })
 
 function fetchIdeas() {
@@ -24,6 +25,7 @@ function fetchIdeas() {
           + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
           + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
           + "</div>"
+          + "<br>"
         )
       })
     },
@@ -54,10 +56,28 @@ function createIdea() {
           + "</p><p>Quality: "
           + newIdea.quality
           + "</p>"
-          + "<button id='delete-post' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-          + "<button id='edit-post' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
+          + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
+          + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
           + "</div>"
+          + "<br>"
         )
+      },
+      error: function(xhr) {
+        console.log(xhr.responseText)
+      }
+    })
+  })
+}
+
+function deleteIdea() {
+  $("#ideas-index").delegate('#delete-idea', 'click', function() {
+    var $idea = $(this).closest(".idea")
+
+    $.ajax({
+      type: "DELETE",
+      url: "/api/v1/ideas/"+ $idea.attr('data-id'),
+      success: function() {
+        $idea.remove()
       },
       error: function(xhr) {
         console.log(xhr.responseText)
