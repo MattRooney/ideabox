@@ -2,6 +2,7 @@ $(document).ready(function() {
   fetchIdeas()
   createIdea()
   deleteIdea()
+  editIdea()
 })
 
 function fetchIdeas() {
@@ -10,29 +11,33 @@ function fetchIdeas() {
     url: "/api/v1/ideas",
     success: function(ideas) {
       $.each(ideas, function(index, idea) {
-        $("#ideas-index").append(
-          "<div class='idea' data-id='"
-          + idea.id
-          + "'><p>Published on "
-          + idea.created_at
-          + "</p><h6>Title: "
-          + idea.title
-          + "</h6><p>Description: "
-          + idea.body
-          + "</p><p>Quality: "
-          + idea.quality
-          + "</p>"
-          + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-          + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
-          + "</div>"
-          + "<br>"
-        )
+        renderIdea(idea)
       })
     },
     error: function(xhr) {
       console.log(xhr.responseText)
     }
   })
+}
+
+function renderIdea(idea) {
+  $("#ideas-index").append(
+    "<div class='idea' data-id='"
+    + idea.id
+    + "'><p>Published on "
+    + idea.created_at
+    + "</p><h6>Title: "
+    + idea.title
+    + "</h6><p>Description: "
+    + idea.body
+    + "</p><p>Quality: "
+    + idea.quality
+    + "</p>"
+    + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
+    + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
+    + "</div>"
+    + "<br>"
+  )
 }
 
 function createIdea() {
@@ -44,23 +49,7 @@ function createIdea() {
       type: "POST",
       url: "/api/v1/ideas?title="+title+"&body="+body,
       success: function(newIdea){
-        $('#ideas-index').append(
-          "<div class='idea' data-id='"
-          + newIdea.id
-          + "'><p>Published on "
-          + newIdea.created_at
-          + "</p><h6>Title: "
-          + newIdea.title
-          + "</h6><p>Description: "
-          + newIdea.body
-          + "</p><p>Quality: "
-          + newIdea.quality
-          + "</p>"
-          + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-          + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
-          + "</div>"
-          + "<br>"
-        )
+        renderIdea(newIdea)
       },
       error: function(xhr) {
         console.log(xhr.responseText)
@@ -78,6 +67,26 @@ function deleteIdea() {
       url: "/api/v1/ideas/"+ $idea.attr('data-id'),
       success: function() {
         $idea.remove()
+      },
+      error: function(xhr) {
+        console.log(xhr.responseText)
+      }
+    })
+  })
+}
+
+function editIdea() {
+
+  // incomplete
+
+  $("#ideas-index").delegate('#edit-idea', 'click', function() {
+    var $idea = $(this).closest(".idea")
+
+    $.ajax({
+      type: "PUT",
+      url: "/api/v1/ideas/"+ $idea.attr('data-id'),
+      success: function(idea) {
+        console.log("Success")
       },
       error: function(xhr) {
         console.log(xhr.responseText)

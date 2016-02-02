@@ -19,9 +19,14 @@ class Api::V1::IdeasController < ApplicationController
   end
 
   def destroy
+    # respond_with Idea.destroy(params[:id])
     @idea = Idea.find_by(idea_params)
     @idea.delete
     respond_with Idea.all
+  end
+
+  def update
+    respond_with Idea.update( params[:id], idea_params )
   end
 
   private
