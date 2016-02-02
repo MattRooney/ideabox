@@ -6,23 +6,22 @@ class Api::V1::IdeasController < ApplicationController
   end
 
   def show
-    respond_with Idea.find_by(idea_params)
+    respond_with Idea.find_by(id: params[:id])
   end
 
   def create
-    @idea = Idea.new(idea_params)
-    if @idea.save
-      respond_with :api, :v1, @idea
+    idea = Idea.new(idea_params)
+    if idea.save
+      respond_with( idea, location: api_v1_idea_path(:idea) )
     else
-      flash[:notice] = "Something went wrong. Please try again."
+      render json: idea.errors, status: 422
     end
   end
 
   def destroy
-    # respond_with Idea.destroy(params[:id])
-    @idea = Idea.find_by(idea_params)
-    @idea.delete
-    respond_with Idea.all
+    respond_with Idea.destroy(params[:id])
+    # @idea = Idea.find_by(id: params[:id])
+    # repsond_with @idea.delete
   end
 
   def update
@@ -32,7 +31,7 @@ class Api::V1::IdeasController < ApplicationController
   private
 
   def idea_params
-    params.permit(:id, :title, :body, :quality)
+    params.require(:idea).permit(:id, :title, :body, :quality)
   end
 
 end
