@@ -31,7 +31,7 @@ class Api::V1::IdeasController < ApplicationController
   private
 
   def idea_params
-    params.require(:idea).permit(:id, :title, :body, :quality)
+    params.permit(:title, :body, :quality)
   end
 
 end

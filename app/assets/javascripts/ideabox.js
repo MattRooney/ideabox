@@ -2,16 +2,21 @@ $(document).ready(function() {
   fetchIdeas()
   createIdea()
   deleteIdea()
-  editIdea()
+  editIdeaTitle()
+  editIdeaBody()
 })
 
 function fetchIdeas() {
+  var newestIdea = parseInt($(".idea").last().attr("data-id"))
+
   $.ajax({
     type: "GET",
     url: "/api/v1/ideas",
     success: function(ideas) {
       $.each(ideas, function(index, idea) {
-        renderIdea(idea)
+        if (isNaN(newestIdea) || idea.id > newestIdea) {
+          renderIdea(idea)
+        }
       })
     },
     error: function(xhr) {
@@ -22,19 +27,21 @@ function fetchIdeas() {
 
 function renderIdea(idea) {
   $("#ideas-index").append(
-    "<div class='idea' data-id='"
+    "<div class='idea bg-info' data-id='"
     + idea.id
-    + "'><p>Published on "
+    + "'><p>Created on "
     + idea.created_at
-    + "</p><h6>Title: "
+    + "</p><p>Title: </p><p contentEditable=true class='edit idea-title'>"
     + idea.title
-    + "</h6><p>Description: "
+    + "</h6><p>Description: </p><p contentEditable=true class='edit idea-body'>"
     + idea.body
     + "</p><p>Quality: "
     + idea.quality
     + "</p>"
-    + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-    + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
+    + "<button id='delete-idea' name='button-delete' class='btn btn-danger btn-xs danger'>Delete</button> "
+    + "<button id='edit-idea' name='button-edit' class='btn btn-warning btn-xs'>Edit</button> "
+    + "<button name='button-up' class='thumbs-up btn btn-success btn-xs '>Thumbs Up</button> "
+    + "<button name='button-down' class='thumbs-down btn btn-primary btn-xs'>Thumbs Down</button> "
     + "</div>"
     + "<br>"
   )
@@ -75,22 +82,46 @@ function deleteIdea() {
   })
 }
 
-function editIdea() {
+function editIdeaTitle() {
+  $("#ideas-index").delegate('.idea-title', 'keypress', function(event) {
+    if (event.which === 13) {
+      event.preventDefault()
+      var idea = $(this).closest(".idea")
+      var data = { title: this.textContent }
 
-  // incomplete
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: data,
+        success: function(idea) {
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    }
+  })
+}
 
-  $("#ideas-index").delegate('#edit-idea', 'click', function() {
-    var $idea = $(this).closest(".idea")
+function editIdeaBody() {
+  $("#ideas-index").delegate('.idea-body', 'keypress', function(event) {
+    if (event.which === 13) {
+      event.preventDefault()
+      var idea = $(this).closest(".idea")
+      var data = { title: this.textContent }
 
-    $.ajax({
-      type: "PUT",
-      url: "/api/v1/ideas/"+ $idea.attr('data-id'),
-      success: function(idea) {
-        console.log("Success")
-      },
-      error: function(xhr) {
-        console.log(xhr.responseText)
-      }
-    })
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: data,
+        success: function(idea) {
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    }
   })
 }
