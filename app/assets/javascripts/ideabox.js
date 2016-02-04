@@ -40,7 +40,7 @@ function renderIdea(idea) {
     + "</p><p>Title: </p><h4 contentEditable=true class='edit idea-title'>"
     + idea.title
     + "</h4><p>Description: </p><h5 contentEditable=true class='edit idea-body'>"
-    + idea.body
+    + truncateIdeaBody(idea.body)
     + "</h5><p>Quality: <span class='idea-quality'>"
     + idea.quality
     + "</span></p>"
@@ -214,4 +214,16 @@ function searchIdeas() {
     })
     hideIdeas.addClass('invisible');
   })
+}
+
+function truncateIdeaBody(string) {
+  if (string.length > 100) {
+    return $.trim(string)
+            .substring(0, 100)
+            .split(" ")
+            .slice(0, -1)
+            .join(" ") + "..."
+  } else {
+    return string
+  }
 }
