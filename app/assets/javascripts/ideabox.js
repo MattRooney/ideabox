@@ -2,8 +2,11 @@ $(document).ready(function() {
   fetchIdeas()
   createIdea()
   deleteIdea()
+  clickEdit()
   editIdeaTitle()
   editIdeaBody()
+  thumbsUp()
+  thumbsDown()
 })
 
 function fetchIdeas() {
@@ -13,7 +16,10 @@ function fetchIdeas() {
     type: "GET",
     url: "/api/v1/ideas",
     success: function(ideas) {
-      $.each(ideas, function(index, idea) {
+      var sortedIdeas = ideas.sort(function(a, b) {
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
+      $.each(sortedIdeas, function(index, idea) {
         if (isNaN(newestIdea) || idea.id > newestIdea) {
           renderIdea(idea)
         }
@@ -26,22 +32,22 @@ function fetchIdeas() {
 }
 
 function renderIdea(idea) {
-  $("#ideas-index").append(
+  $("#ideas-index").prepend(
     "<div class='idea bg-info' data-id='"
     + idea.id
     + "'><p>Created on "
     + idea.created_at
-    + "</p><p>Title: </p><p contentEditable=true class='edit idea-title'>"
+    + "</p><p>Title: </p><h4 contentEditable=true class='edit idea-title'>"
     + idea.title
-    + "</h6><p>Description: </p><p contentEditable=true class='edit idea-body'>"
+    + "</h4><p>Description: </p><h5 contentEditable=true class='edit idea-body'>"
     + idea.body
-    + "</p><p>Quality: "
+    + "</h5><p>Quality: <span class='idea-quality'>"
     + idea.quality
-    + "</p>"
+    + "</span></p>"
     + "<button id='delete-idea' name='button-delete' class='btn btn-danger btn-xs danger'>Delete</button> "
     + "<button id='edit-idea' name='button-edit' class='btn btn-warning btn-xs'>Edit</button> "
-    + "<button name='button-up' class='thumbs-up btn btn-success btn-xs '>Thumbs Up</button> "
-    + "<button name='button-down' class='thumbs-down btn btn-primary btn-xs'>Thumbs Down</button> "
+    + "<button name='button-up' class='thumbs-up glyphicon glyphicon-thumbs-up btn-success'></button> "
+    + "<button name='button-down' class='thumbs-down glyphicon glyphicon-thumbs-down btn-primary'>  </button> "
     + "</div>"
     + "<br>"
   )
@@ -51,12 +57,13 @@ function createIdea() {
   $("#create-idea").on("click", function() {
     var title = $('#idea-title').val()
     var body = $('#idea-description').val()
-
     $.ajax({
       type: "POST",
       url: "/api/v1/ideas?title="+title+"&body="+body,
       success: function(newIdea){
         renderIdea(newIdea)
+        $("#idea-title").val("");
+        $("#idea-description").val("");
       },
       error: function(xhr) {
         console.log(xhr.responseText)
@@ -68,7 +75,7 @@ function createIdea() {
 function deleteIdea() {
   $("#ideas-index").delegate('#delete-idea', 'click', function() {
     var $idea = $(this).closest(".idea")
-
+    debugger
     $.ajax({
       type: "DELETE",
       url: "/api/v1/ideas/"+ $idea.attr('data-id'),
@@ -86,6 +93,7 @@ function editIdeaTitle() {
   $("#ideas-index").delegate('.idea-title', 'keypress', function(event) {
     if (event.which === 13) {
       event.preventDefault()
+      this.blur()
       var idea = $(this).closest(".idea")
       var data = { title: this.textContent }
 
@@ -108,6 +116,7 @@ function editIdeaBody() {
   $("#ideas-index").delegate('.idea-body', 'keypress', function(event) {
     if (event.which === 13) {
       event.preventDefault()
+      this.blur()
       var idea = $(this).closest(".idea")
       var data = { title: this.textContent }
 
@@ -123,5 +132,77 @@ function editIdeaBody() {
         }
       })
     }
+  })
+}
+
+function thumbsUp() {
+  $("#ideas-index").delegate('.thumbs-up', 'click', function() {
+    var idea = $(this).closest(".idea")
+    var qualitySpan = idea.find('.idea-quality')
+    var qualityText = qualitySpan.text()
+    debugger
+    if (qualityText === "swill") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "plausible" },
+        success: function() {
+          renderIdea(idea),
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else if (qualityText === "plausible") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "genius" },
+        success: function() {
+          renderIdea(idea)
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else {}
+  })
+}
+
+function thumbsDown() {
+  $("#ideas-index").delegate('.thumbs-down', 'click', function() {
+    var idea = $(this).closest(".idea")
+    var qualitySpan = idea.find('.idea-quality')
+    var qualityText = qualitySpan.text()
+
+    if (qualityText === "genius") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "plausible" },
+        success: function() {
+          renderIdea(idea),
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else if (qualityText === "plausible") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "swill" },
+        success: function() {
+          renderIdea(idea)
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else {}
   })
 }
