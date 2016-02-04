@@ -2,16 +2,26 @@ $(document).ready(function() {
   fetchIdeas()
   createIdea()
   deleteIdea()
-  editIdea()
+  editIdeaTitle()
+  editIdeaBody()
+  thumbsUp()
+  thumbsDown()
 })
 
 function fetchIdeas() {
+  var newestIdea = parseInt($(".idea").last().attr("data-id"))
+
   $.ajax({
     type: "GET",
     url: "/api/v1/ideas",
     success: function(ideas) {
-      $.each(ideas, function(index, idea) {
-        renderIdea(idea)
+      var sortedIdeas = ideas.sort(function(a, b) {
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
+      $.each(sortedIdeas, function(index, idea) {
+        if (isNaN(newestIdea) || idea.id > newestIdea) {
+          renderIdea(idea)
+        }
       })
     },
     error: function(xhr) {
@@ -21,20 +31,22 @@ function fetchIdeas() {
 }
 
 function renderIdea(idea) {
-  $("#ideas-index").append(
-    "<div class='idea' data-id='"
+  $("#ideas-index").prepend(
+    "<div class='idea bg-info' data-id='"
     + idea.id
-    + "'><p>Published on "
+    + "'><p>Created on "
     + idea.created_at
-    + "</p><h6>Title: "
+    + "</p><p>Title: </p><h4 contentEditable=true class='edit idea-title'>"
     + idea.title
-    + "</h6><p>Description: "
+    + "</h4><p>Description: </p><h5 contentEditable=true class='edit idea-body'>"
     + idea.body
-    + "</p><p>Quality: "
+    + "</h5><p>Quality: <span class='idea-quality'>"
     + idea.quality
-    + "</p>"
-    + "<button id='delete-idea' name='button-fetch' class='btn btn-default btn-xs'>Delete</button>"
-    + "<button id='edit-idea' name='button-fetch' class='btn btn-default btn-xs'>Edit</button>"
+    + "</span></p>"
+    + "<button id='delete-idea' name='button-delete' class='btn btn-danger btn-xs danger'>Delete</button> "
+    + "<button id='edit-idea' name='button-edit' class='btn btn-warning btn-xs'>Edit</button> "
+    + "<button name='button-up' class='thumbs-up glyphicon glyphicon-thumbs-up btn-success'></button> "
+    + "<button name='button-down' class='thumbs-down glyphicon glyphicon-thumbs-down btn-primary'>  </button> "
     + "</div>"
     + "<br>"
   )
@@ -44,12 +56,13 @@ function createIdea() {
   $("#create-idea").on("click", function() {
     var title = $('#idea-title').val()
     var body = $('#idea-description').val()
-
     $.ajax({
       type: "POST",
       url: "/api/v1/ideas?title="+title+"&body="+body,
       success: function(newIdea){
         renderIdea(newIdea)
+        $("#idea-title").val("");
+        $("#idea-description").val("");
       },
       error: function(xhr) {
         console.log(xhr.responseText)
@@ -61,7 +74,7 @@ function createIdea() {
 function deleteIdea() {
   $("#ideas-index").delegate('#delete-idea', 'click', function() {
     var $idea = $(this).closest(".idea")
-
+    debugger
     $.ajax({
       type: "DELETE",
       url: "/api/v1/ideas/"+ $idea.attr('data-id'),
@@ -75,22 +88,116 @@ function deleteIdea() {
   })
 }
 
-function editIdea() {
+function editIdeaTitle() {
+  $("#ideas-index").delegate('.idea-title', 'keypress', function(event) {
+    if (event.which === 13) {
+      event.preventDefault()
+      this.blur()
+      var idea = $(this).closest(".idea")
+      var data = { title: this.textContent }
 
-  // incomplete
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: data,
+        success: function(idea) {
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    }
+  })
+}
 
-  $("#ideas-index").delegate('#edit-idea', 'click', function() {
-    var $idea = $(this).closest(".idea")
+function editIdeaBody() {
+  $("#ideas-index").delegate('.idea-body', 'keypress', function(event) {
+    if (event.which === 13) {
+      event.preventDefault()
+      this.blur()
+      var idea = $(this).closest(".idea")
+      var data = { title: this.textContent }
 
-    $.ajax({
-      type: "PUT",
-      url: "/api/v1/ideas/"+ $idea.attr('data-id'),
-      success: function(idea) {
-        console.log("Success")
-      },
-      error: function(xhr) {
-        console.log(xhr.responseText)
-      }
-    })
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: data,
+        success: function(idea) {
+          console.log("Success")
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    }
+  })
+}
+
+function thumbsUp() {
+  $("#ideas-index").delegate('.thumbs-up', 'click', function() {
+    var idea = $(this).closest(".idea")
+    var qualitySpan = idea.find('.idea-quality')
+    var qualityText = qualitySpan.text()
+
+    if (qualityText === "swill") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "plausible" },
+        success: function() {
+          qualitySpan.text("plausible");
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else if (qualityText === "plausible") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "genius" },
+        success: function() {
+          qualitySpan.text("genius");
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else {}
+  })
+}
+
+function thumbsDown() {
+  $("#ideas-index").delegate('.thumbs-down', 'click', function() {
+    var idea = $(this).closest(".idea")
+    var qualitySpan = idea.find('.idea-quality')
+    var qualityText = qualitySpan.text()
+
+    if (qualityText === "genius") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "plausible" },
+        success: function() {
+          qualitySpan.text("plausible");
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else if (qualityText === "plausible") {
+      $.ajax({
+        type: "PUT",
+        url: "/api/v1/ideas/"+ idea.attr('data-id'),
+        data: { quality: "swill" },
+        success: function() {
+          qualitySpan.text("swill");
+        },
+        error: function(xhr) {
+          console.log(xhr.responseText)
+        }
+      })
+    } else {}
   })
 }

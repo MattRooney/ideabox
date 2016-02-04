@@ -53,7 +53,7 @@ class Api::V1::IdeasControllerTest < ActionController::TestCase
 
     post :create, idea: idea, format: :json
 
-    assert_equal idea[:title], json_reponse["title"]
+    assert_equal idea[:title], json_reponse
     assert_equal idea[:body], json_reponse["body"]
     assert_equal idea[:quality], json_reponse["quality"]
   end
@@ -61,8 +61,6 @@ class Api::V1::IdeasControllerTest < ActionController::TestCase
   test "#destroy removes an idea from the database" do
     idea = { title: "New Idea", body: "Such a great idea", quality: "swill" }
     post :create, idea: idea, format: :json
-
-    assert_equal idea[:title], json_reponse["title"]
 
     assert_difference 'Idea.count', -1 do
       delete :destroy, id: Idea.last.id, format: :json
