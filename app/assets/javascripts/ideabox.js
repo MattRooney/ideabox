@@ -45,7 +45,6 @@ function renderIdea(idea) {
     + idea.quality
     + "</span></p>"
     + "<button id='delete-idea' name='button-delete' class='btn btn-danger btn-xs danger'>Delete</button> "
-    + "<button id='edit-idea' name='button-edit' class='btn btn-warning btn-xs'>Edit</button> "
     + "<button name='button-up' class='thumbs-up glyphicon glyphicon-thumbs-up btn-success'></button> "
     + "<button name='button-down' class='thumbs-down glyphicon glyphicon-thumbs-down btn-primary'>  </button> "
     + "</div>"
@@ -118,7 +117,7 @@ function editIdeaBody() {
       event.preventDefault()
       this.blur()
       var idea = $(this).closest(".idea")
-      var data = { title: this.textContent }
+      var data = { body: this.textContent }
 
       $.ajax({
         type: "PUT",
