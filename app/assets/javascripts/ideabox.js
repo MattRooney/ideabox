@@ -2,7 +2,6 @@ $(document).ready(function() {
   fetchIdeas()
   createIdea()
   deleteIdea()
-  clickEdit()
   editIdeaTitle()
   editIdeaBody()
   thumbsUp()
@@ -140,15 +139,14 @@ function thumbsUp() {
     var idea = $(this).closest(".idea")
     var qualitySpan = idea.find('.idea-quality')
     var qualityText = qualitySpan.text()
-    debugger
+
     if (qualityText === "swill") {
       $.ajax({
         type: "PUT",
         url: "/api/v1/ideas/"+ idea.attr('data-id'),
         data: { quality: "plausible" },
         success: function() {
-          renderIdea(idea),
-          console.log("Success")
+          qualitySpan.text("plausible");
         },
         error: function(xhr) {
           console.log(xhr.responseText)
@@ -160,8 +158,7 @@ function thumbsUp() {
         url: "/api/v1/ideas/"+ idea.attr('data-id'),
         data: { quality: "genius" },
         success: function() {
-          renderIdea(idea)
-          console.log("Success")
+          qualitySpan.text("genius");
         },
         error: function(xhr) {
           console.log(xhr.responseText)
@@ -183,8 +180,7 @@ function thumbsDown() {
         url: "/api/v1/ideas/"+ idea.attr('data-id'),
         data: { quality: "plausible" },
         success: function() {
-          renderIdea(idea),
-          console.log("Success")
+          qualitySpan.text("plausible");
         },
         error: function(xhr) {
           console.log(xhr.responseText)
@@ -196,8 +192,7 @@ function thumbsDown() {
         url: "/api/v1/ideas/"+ idea.attr('data-id'),
         data: { quality: "swill" },
         success: function() {
-          renderIdea(idea)
-          console.log("Success")
+          qualitySpan.text("swill");
         },
         error: function(xhr) {
           console.log(xhr.responseText)
