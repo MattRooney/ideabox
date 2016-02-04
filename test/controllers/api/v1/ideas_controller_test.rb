@@ -49,21 +49,32 @@ class Api::V1::IdeasControllerTest < ActionController::TestCase
   end
 
   test "#create creates an idea with the correct properties, including quality" do
-    idea = { title: "New Idea", body: "Such a great idea", quality: "swill" }
+    idea = { title: "New Idea", body: "Such a great idea" }
 
-    post :create, idea: idea, format: :json
+    post :create, title: "New Idea", body: "Such a great idea", format: :json
 
-    assert_equal idea[:title], json_reponse
+    assert_equal idea[:title], json_reponse["title"]
     assert_equal idea[:body], json_reponse["body"]
-    assert_equal idea[:quality], json_reponse["quality"]
+    assert_equal "swill", json_reponse["quality"]
   end
 
   test "#destroy removes an idea from the database" do
     idea = { title: "New Idea", body: "Such a great idea", quality: "swill" }
-    post :create, idea: idea, format: :json
+    post :create, title: "New Idea", body: "Such a great idea", format: :json
 
     assert_difference 'Idea.count', -1 do
       delete :destroy, id: Idea.last.id, format: :json
     end
+
+    refute_equal "New Idea", Idea.last.title
+  end
+
+  test "#updates an idea with correct properties" do
+    idea = { title: "New Idea", body: "Such a great idea" }
+    post :create, title: "New Idea", body: "Such a great idea", format: :json
+
+    put :update, title: "Better Idea", format: :json, id: Idea.last.id
+
+    assert_equal "Better Idea", Idea.last.title
   end
 end

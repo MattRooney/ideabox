@@ -20,8 +20,6 @@ class Api::V1::IdeasController < ApplicationController
 
   def destroy
     respond_with Idea.destroy(params[:id])
-    # @idea = Idea.find_by(id: params[:id])
-    # repsond_with @idea.delete
   end
 
   def update
